@@ -39,7 +39,6 @@ class PersonalFinanceAssistant:
     def analyze_expenses(self):
         df = pd.DataFrame(
             {'Expense': self.expenses, 'Category': self.categories})
-        plt.figure(figsize=(10, 6))
         sns.barplot(x='Category', y='Expense', data=df)
         plt.xticks(rotation=45)
         plt.xlabel('Category')
@@ -56,12 +55,10 @@ class PersonalFinanceAssistant:
         model = LinearRegression()
         model.fit(X, y)
         budget = model.predict(X)
-        df['Budget'] = budget
-        df['Budget'] = np.where(df['Budget'] < 0, 0, df['Budget'])
+        df['Budget'] = np.where(budget < 0, 0, budget)
         df['Budget'] = np.round(df['Budget'], 2)
-        df['Difference'] = df['Budget'] - df['Expense']
-        df['Difference'] = np.where(df['Difference'] < 0, 0, df['Difference'])
-        plt.figure(figsize=(10, 6))
+        df['Difference'] = np.where(
+            df['Budget'] - df['Expense'] < 0, 0, df['Budget'] - df['Expense'])
         sns.barplot(x='Category', y='Budget', data=df)
         plt.xticks(rotation=45)
         plt.xlabel('Category')
@@ -93,9 +90,7 @@ class PersonalFinanceAssistant:
 
         model = LinearRegression()
         model.fit(df[['Category', 'Cluster']], df['Expense'])
-        self.expense_predictions = model.predict(predict_df)
-        self.expense_predictions = np.round(self.expense_predictions, 2)
-        plt.figure(figsize=(10, 6))
+        self.expense_predictions = np.round(model.predict(predict_df), 2)
         plt.plot(range(1, len(self.expense_predictions)+1),
                  self.expense_predictions, 'o-', label='Predicted Expense')
         plt.xlabel('Expense')
